@@ -18,6 +18,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import android.Manifest;
+import android.widget.Toast;
+
 import com.airbnb.lottie.LottieAnimationView;
 import com.example.RequestModels.AssetViewModel;
 import com.example.Service.ApiClient;
@@ -171,21 +173,25 @@ public class AssetViewActivity extends AppCompatActivity {
     }
 
     private void setupScanner() {
-        barcodeDetector = new BarcodeDetector.Builder(this).setBarcodeFormats(Barcode.ALL_FORMATS).build();
+        barcodeDetector = new BarcodeDetector.Builder(this)
+                .setBarcodeFormats(Barcode.ALL_FORMATS)
+                .build();
 
-        cameraSource = new CameraSource.Builder(this, barcodeDetector).setRequestedPreviewSize(1024, 768).setAutoFocusEnabled(true).build();
+        cameraSource = new CameraSource.Builder(this, barcodeDetector)
+                .setRequestedPreviewSize(1024, 768)
+                .setAutoFocusEnabled(true)
+                .build();
 
         previewView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(@NonNull SurfaceHolder holder) {
-                if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(AssetViewActivity.this, new String[]{Manifest.permission.CAMERA}, 201);
-                    return;
-                }
-                try {
-                    cameraSource.start(previewView.getHolder());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                // Don't start camera here if permission not granted
+                if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(AssetViewActivity.this,
+                            new String[]{Manifest.permission.CAMERA}, 201);
+                } else {
+                    startCamera();
                 }
             }
 
@@ -221,6 +227,29 @@ public class AssetViewActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void startCamera() {
+        try {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                cameraSource.start(previewView.getHolder());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 201) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startCamera();
+            } else {
+                Toast.makeText(this, "Camera permission is required", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 
 
     private void fetchAssetDetails(String assetNo) {
@@ -271,18 +300,6 @@ public class AssetViewActivity extends AppCompatActivity {
                 ToastUtil.showRedToast(AssetViewActivity.this, "Failure:" + t.getMessage(), 3000);
             }
         });
-//       isScannerActive = true;
-    }
-
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CAMERA_PERMISSION && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//            setupScanner();
-        } else {
-            ToastUtil.showBlueToast(AssetViewActivity.this, "Camera permission required", 3000);
-        }
     }
 }
 
