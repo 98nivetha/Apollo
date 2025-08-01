@@ -1,0 +1,6 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/spinner_border"/>
+    <item android:right="16dp" android:left="8dp">
+        <bitmap android:src="@drawable/dropdown_arrow" android:gravity="right"/>
+    </item>
+</layer-list>

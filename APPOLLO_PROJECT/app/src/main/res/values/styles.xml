@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="text_in_layout_hint_Style">
+        <item name="android:textColor">#FF0000</item>
+        <item name="android:textSize">2sp</item>
+    </style>
+
+    <style name="RoundedImageViewStyle" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">7dp</item> <!-- Change this to control radius -->
+    </style>
+
+</resources>
